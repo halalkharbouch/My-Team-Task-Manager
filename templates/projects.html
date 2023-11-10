@@ -21,6 +21,7 @@
     <div class="main px-lg-4 px-md-4">
 
         <!-- Body: Header -->
+        <!-- Body: Header -->
         <div class="header">
             <nav class="navbar py-4">
                 <div class="container-xxl">
@@ -52,7 +53,7 @@
                         <div class="dropdown notifications zindex-popover">
                             <a class="nav-link dropdown-toggle pulse" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="icofont-alarm fs-5"></i>
-                                <span class="pulse-ring"></span>
+                                
                             </a>
                             <div id="NotificationsDiv"
                                  class="dropdown-menu rounded-lg shadow border-0 dropdown-animation dropdown-menu-sm-end p-0 m-0">
@@ -69,11 +70,11 @@
 
 
 
-                                                {% for notification in current_user.notifications_received %}
+                                                {% for notification in current_user.notifications_received[::-1] %}
                                                 <li class="py-2">
                                                     <a href="javascript:void(0);" class="d-flex">
                                                         <img class="avatar rounded-circle sm"
-                                                             src="../static/images/xs/{{ notification.sender.avatar_location }}" alt="">
+                                                             src="../static/images/lg/{{ notification.sender.avatar_location }}" alt="">
                                                         <div class="flex-fill ms-2">
                                                             <p class="d-flex justify-content-between mb-0 "><span
                                                                     class="font-weight-bold">{{ notification.sender.first_name }} {{ notification.sender.last_name }}</span> <small
@@ -86,7 +87,7 @@
                                             </ul>
                                         </div>
                                     </div>
-                                    <a class="card-footer text-center border-top-0" href="#"> View all notifications</a>
+
                                 </div>
                             </div>
                         </div>
@@ -122,19 +123,15 @@
                                         </div>
                                     </div>
                                     <div class="list-group m-2 ">
-                                        <a href="task.html" class="list-group-item list-group-item-action border-0 "><i
-                                                class="icofont-tasks fs-5 me-3"></i>My Task</a>
-                                        <a href="members.html" class="list-group-item list-group-item-action border-0 "><i
-                                                class="icofont-ui-user-group fs-6 me-3"></i>members</a>
+
+
                                         <a href="{{ url_for('logout') }}"
                                            class="list-group-item list-group-item-action border-0 "><i
                                                 class="icofont-logout fs-6 me-3"></i>Signout</a>
                                         <div>
                                             <hr class="dropdown-divider border-dark">
                                         </div>
-                                        <a href="ui-elements/auth-signup.html"
-                                           class="list-group-item list-group-item-action border-0 "><i
-                                                class="icofont-contact-add fs-5 me-3"></i>Add personal account</a>
+
                                     </div>
                                 </div>
                             </div>
@@ -176,19 +173,7 @@
                     <div class="border-0 mb-4">
                         <div class="card-header p-0 no-bg bg-transparent d-flex align-items-center px-0 justify-content-between border-bottom flex-wrap">
                             <h3 class="fw-bold py-3 mb-0">My Tasks</h3>
-                            <div class="d-flex py-2 project-tab flex-wrap w-sm-100">
 
-                                <ul class="nav nav-tabs tab-body-header rounded ms-3 prtab-set w-sm-100" role="tablist">
-                                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab"
-                                                            href="#All-list" role="tab">All</a></li>
-                                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#Started-list"
-                                                            role="tab">Tasks</a></li>
-                                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#Approval-list"
-                                                            role="tab">In Progress</a></li>
-                                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#Completed-list"
-                                                            role="tab">Completed</a></li>
-                                </ul>
-                            </div>
                         </div>
                     </div>
                 </div> <!-- Row end  -->
@@ -200,7 +185,9 @@
                             <div class="card-header py-3">
                                 <h6 class="mb-0 fw-bold ">Tasks</h6>
                             </div>
-                            {% for task in current_user.tasks if task.task_status == 'new' %}
+                            {% for task in current_user.tasks[::-1] if task.task_status == 'new' %}
+
+
                                 <div class="card-body">
                                     <div class="planned_task client_task">
                                         <div class="dd" data-plugin="nestable">
@@ -213,7 +200,7 @@
                                                                 <div class="avatar-list avatar-list-stacked m-0">
 
                                                                     <img class="avatar rounded-circle small-avt sm"
-                                                                         src="../static/images/xs/{{ task.author.avatar_location }}" alt="">
+                                                                         src="../static/images/lg/{{ task.author.avatar_location }}" alt="">
                                                                 </div>
                                                                 <span class="badge bg-lightblue text-end mt-1">New</span>
                                                             </div>
@@ -231,10 +218,15 @@
                                                                         data-bs-toggle="modal"
                                                                         data-bs-target="#edittickit{{ task.id }}">
                                                                     <i class="icofont-edit text-success"></i></button>
-                                                                <button type="button"
+
+                                                                 {% if task.author.id == current_user.id %}
+                                                                <form action="{{ url_for('my_boards', task_id=task.id) }}" method="post">
+                                                                <button name="delete_task" type="submit"
                                                                         class="btn btn-outline-secondary deleterow"><i
                                                                         class="icofont-ui-delete text-danger"></i>
                                                                 </button>
+                                                                    </form>
+                                                                {% endif %}
                                                             </div>
 
 
@@ -253,7 +245,7 @@
 
 
                             <!-- Add User To Task-->
-        <div class="modal fade" id="addUserTask" tabindex="-1" aria-labelledby="addUserLabel" aria-hidden="true">
+        <div class="modal fade" id="addUserTask{{ task.id }}" tabindex="-1" aria-labelledby="addUserLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -273,7 +265,7 @@
                                 <li class="list-group-item py-3 text-center text-md-start">
                                     <div class="d-flex align-items-center flex-column flex-sm-column flex-md-column flex-lg-row">
                                         <div class="no-thumbnail mb-2 mb-md-0">
-                                            <img class="avatar lg rounded-circle" src="../static/images/xs/{{ current_user.avatar_location }}"
+                                            <img class="avatar lg rounded-circle" src="../static/images/lg/{{ current_user.avatar_location }}"
                                                  alt="">
                                         </div>
                                         <div class="flex-fill ms-3 text-truncate">
@@ -283,11 +275,13 @@
 
                                     </div>
                                 </li>
+
                                 {% for team_member in current_user.teams %}
+
                                 <li class="list-group-item py-3 text-center text-md-start">
                                     <div class="d-flex align-items-center flex-column flex-sm-column flex-md-column flex-lg-row">
                                         <div class="no-thumbnail mb-2 mb-md-0">
-                                            <img class="avatar lg rounded-circle" src="../static/images/xs/{{ team_member.avatar_location }}"
+                                            <img class="avatar lg rounded-circle" src="../static/images/lg/{{ team_member.avatar_location }}"
                                                  alt="">
                                         </div>
                                         <div class="flex-fill ms-3 text-truncate">
@@ -295,18 +289,24 @@
                                             <span class="text-muted">{{ team_member.email }}</span>
                                         </div>
                                         {% if task not in team_member.tasks %}
-                                        </form>
-                                                <form action="{{ url_for('my_boards', user=team_member.id, task=task.id) }}" method="post">
-                                            <div class="btn-group">
-                                                <button href="{{ url_for('my_boards') }}" name="add_user_to_task" type="submit" class="btn btn-primary"
-                                                         aria-expanded="false">
-                                                    Add User
-                                                </button>
 
-                                            </div>
-                                                </form>
+                                            <form action="{{ url_for('my_boards', user=team_member.id, task_id=task.id) }}" method="post">
+                                                    <div class="btn-group">
+                                                        <button href="{{ url_for('my_boards') }}" name="add_user_to_task" type="submit" class="btn btn-primary"
+                                                                 aria-expanded="false">
+                                                            Add User
+                                                        </button>
+
+                                                    </div>
+                                                 </form>
+
+
                                         {% else %}
-                                        <div class="members-action">
+
+
+
+                                            {% if task.author.id == current_user.id %}
+                                             <div class="members-action">
 
                                             <div class="btn-group">
                                                 <button type="button" class="btn bg-transparent dropdown-toggle"
@@ -323,6 +323,9 @@
                                                 </ul>
                                             </div>
                                         </div>
+                                                {% endif %}
+
+
                                         {% endif %}
                                     </div>
                                 </li>
@@ -343,6 +346,7 @@
 
                             {% endfor %}
 
+
                             <div class="mx-auto pb-3 w-75">
 
                                 <a href="#" data-bs-target="#addtask" data-bs-toggle="modal"
@@ -362,7 +366,7 @@
                             <div class="card-header py-3">
                                 <h6 class="mb-0 fw-bold ">In Progress</h6>
                             </div>
-                            {% for task in current_user.tasks if task.task_status == 'inprogress' %}
+                            {% for task in current_user.tasks[::-1] if task.task_status == 'inprogress' %}
                                 <div class="card-body">
                                     <div class="planned_task client_task">
                                         <div class="dd" data-plugin="nestable">
@@ -375,7 +379,7 @@
                                                                 <div class="avatar-list avatar-list-stacked m-0">
 
                                                                     <img class="avatar rounded-circle small-avt sm"
-                                                                         src="../static/images/xs/{{ task.author.avatar_location }}" alt="">
+                                                                         src="../static/images/lg/{{ task.author.avatar_location }}" alt="">
                                                                 </div>
                                                                 <span class="badge bg-warning text-end mt-1">inprogress</span>
                                                             </div>
@@ -393,10 +397,12 @@
                                                                         data-bs-toggle="modal"
                                                                         data-bs-target="#edittickit{{ task.id }}">
                                                                     <i class="icofont-edit text-success"></i></button>
-                                                                <button type="button"
+                                                                <form action="{{ url_for('my_boards', task_id=task.id) }}" method="post">
+                                                                <button name="delete_task" type="submit"
                                                                         class="btn btn-outline-secondary deleterow"><i
                                                                         class="icofont-ui-delete text-danger"></i>
                                                                 </button>
+                                                                    </form>
                                                             </div>
 
 
@@ -433,7 +439,7 @@
                             <div class="card-header py-3">
                                 <h6 class="mb-0 fw-bold ">Completed</h6>
                             </div>
-                            {% for task in current_user.tasks if task.task_status == 'completed' %}
+                            {% for task in current_user.tasks[::-1] if task.task_status == 'completed' %}
                                 <div class="card-body">
                                     <div class="planned_task client_task">
                                         <div class="dd" data-plugin="nestable">
@@ -446,7 +452,7 @@
                                                                 <div class="avatar-list avatar-list-stacked m-0">
 
                                                                     <img class="avatar rounded-circle small-avt sm"
-                                                                         src="../static/images/xs/{{ task.author.avatar_location }}" alt="">
+                                                                         src="../static/images/lg/{{ task.author.avatar_location }}" alt="">
                                                                 </div>
                                                                 <span class="badge bg-success text-end mt-1">completed</span>
                                                             </div>
@@ -464,10 +470,12 @@
                                                                         data-bs-toggle="modal"
                                                                         data-bs-target="#edittickit{{ task.id }}">
                                                                     <i class="icofont-edit text-success"></i></button>
-                                                                <button type="button"
+                                                                <form action="{{ url_for('my_boards', task_id=task.id) }}" method="post">
+                                                                <button name="delete_task" type="submit"
                                                                         class="btn btn-outline-secondary deleterow"><i
                                                                         class="icofont-ui-delete text-danger"></i>
                                                                 </button>
+                                                                    </form>
                                                             </div>
 
                                                         </div>
@@ -523,7 +531,7 @@
                                 <li class="list-group-item py-3 text-center text-md-start">
                                     <div class="d-flex align-items-center flex-column flex-sm-column flex-md-column flex-lg-row">
                                         <div class="no-thumbnail mb-2 mb-md-0">
-                                            <img class="avatar lg rounded-circle" src="../static/images/xs/{{ invites.avatar_location }}"
+                                            <img class="avatar lg rounded-circle" src="../static/images/lg/{{ invites.avatar_location }}"
                                                  alt="">
                                         </div>
                                         <div class="flex-fill ms-3 text-truncate">
@@ -568,7 +576,7 @@
                                 <li class="list-group-item py-3 text-center text-md-start">
                                     <div class="d-flex align-items-center flex-column flex-sm-column flex-md-column flex-lg-row">
                                         <div class="no-thumbnail mb-2 mb-md-0">
-                                            <img class="avatar lg rounded-circle" src="../static/images/xs/{{ current_user.avatar_location }}"
+                                            <img class="avatar lg rounded-circle" src="../static/images/lg/{{ current_user.avatar_location }}"
                                                  alt="">
                                         </div>
                                         <div class="flex-fill ms-3 text-truncate">
@@ -582,7 +590,7 @@
                                 <li class="list-group-item py-3 text-center text-md-start">
                                     <div class="d-flex align-items-center flex-column flex-sm-column flex-md-column flex-lg-row">
                                         <div class="no-thumbnail mb-2 mb-md-0">
-                                            <img class="avatar lg rounded-circle" src="../static/images/xs/{{ team_member.avatar_location }}"
+                                            <img class="avatar lg rounded-circle" src="../static/images/lg/{{ team_member.avatar_location }}"
                                                  alt="">
                                         </div>
                                         <div class="flex-fill ms-3 text-truncate">
@@ -631,7 +639,7 @@
 
 
         <!-- Tasks List -->
-        {% for task in current_user.tasks %}
+        {% for task in current_user.tasks[::-1] %}
         <!-- Task Details Edit-->
         <div class="modal fade" id="edittickit{{ task.id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
@@ -656,11 +664,11 @@
                                     <div class="avatar-list avatar-list-stacked ">
                                         {% for member in current_user.teams %}
                                         <img class="avatar rounded-circle"
-                                             src="../static/images/xs/{{ member.avatar_location }}" alt="">
+                                             src="../static/images/lg/{{ member.avatar_location }}" alt="">
                                         {% endfor %}
                                         <span class="avatar rounded-circle text-center pointer"
                                               data-bs-toggle="modal"
-                                              data-bs-target="#addUserTask"><i
+                                              data-bs-target="#addUserTask{{ task.id }}"><i
                                                 class="icofont-ui-add"></i></span>
                                     </div>
                                 </div>
@@ -745,7 +753,7 @@
 
                                                                 <div class="col-12">
                                                                     <img class="avatar rounded-circle small-avt sm"
-                                                                         src="../static/images/xs/{{ checklist.assigned_to.avatar_location }}"
+                                                                         src="../static/images/lg/{{ checklist.assigned_to.avatar_location }}"
                                                                          alt="">
                                                                     <span class="fw-bold">{{ checklist.assigned_to.first_name }} {{ checklist.assigned_to.last_name }}</span>
                                                                 </div>
@@ -843,7 +851,7 @@
                                                     <div class="card-body">
                                                         <div class="d-flex mb-3 pb-3 border-bottom">
                                                             <img class="avatar rounded-circle"
-                                                                 src="../static/images/xs/{{ comment.comment_author.avatar_location }}"
+                                                                 src="../static/images/lg/{{ comment.comment_author.avatar_location }}"
                                                                  alt="">
                                                             <div class="flex-fill ms-3 text-truncate">
                                                                 <h6 class="mb-0"><span>{{ comment.comment_author.first_name }} {{ comment.comment_author.last_name }}</span>
@@ -865,7 +873,7 @@
                                                                 {%  for replies in comment.replies %}
                                                                 <div class="d-flex mt-3 pt-3 border-top">
                                                                     <img class="avatar rounded-circle"
-                                                                         src="../static/images/xs/{{ replies.reply_author.avatar_location }}"
+                                                                         src="../static/images/lg/{{ replies.reply_author.avatar_location }}"
                                                                          alt="">
                                                                     <div class="flex-fill ms-3 text-truncate">
                                                                         <p class="mb-0"><span>{{ replies.reply_author.first_name }} {{ replies.reply_author.last_name }}</span>

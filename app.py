@@ -22,7 +22,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("secret_key")
 
 # DB configurations (sqlalchemy)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("database_uri")
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///halal_tasks.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
@@ -363,7 +363,8 @@ def my_boards():
             db.session.commit()
         elif 'add_user_to_task' in request.form:
             user_to_add = User.query.get(request.args.get('user'))
-            task = Task.query.get(request.args.get('task'))
+            task = Task.query.get(request.args.get('task_id'))
+            print(task.task_description, task.id)
 
             new_notification = Notification(notificationtext=f"Added You to a task: {task.task_description}",
                                             sender=current_user,
@@ -378,6 +379,12 @@ def my_boards():
             task = Task.query.get(request.args.get('task_id'))
             user.tasks.remove(task)
             db.session.commit()
+        elif 'delete_task' in request.form:
+            task = Task.query.get(request.args.get("task_id"))
+            print(task)
+            db.session.delete(task)
+            db.session.commit()
+            return redirect(url_for('dashboard'))
     return render_template('projects.html', current_page=current_page, all_tasks=all_tasks, all_checklists=all_checklists)
 
 
