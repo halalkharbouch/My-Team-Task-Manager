@@ -4,10 +4,14 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, cur
 import sqlalchemy.exc
 from sqlalchemy.orm import relationship, sessionmaker
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, DateTime
 from functools import wraps
 import random
 import os
+from sqlalchemy.dialects.sqlite import JSON
+import datetime
+from datetime import datetime
+import json
 
 
 #Setting Up Avatar
@@ -112,6 +116,7 @@ class Comment(db.Model):
     task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'))
 
     replies = db.relationship("Reply", backref="parent_comment")
+    time_stamp = db.Column(DateTime, default=datetime.now)
 
 ## Reply Table
 class Reply(db.Model):
@@ -123,7 +128,7 @@ class Reply(db.Model):
 
 
     comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
-
+    time_stamp = db.Column(DateTime, default=datetime.now)
 
 ## Task Table
 ## Tasks Table
@@ -171,6 +176,8 @@ class Notification(db.Model):
     # Define relationships to User for sender and recipient
     sender = db.relationship('User', foreign_keys=[send_by], back_populates='notifications_sent', lazy='joined')
     recipient = db.relationship('User', foreign_keys=[send_to], back_populates='notifications_received', lazy='joined')
+    time_stamp = db.Column(DateTime, default=datetime.now)
+
 
 
 
@@ -182,6 +189,42 @@ with app.app_context():
 
 
 # -------------------------- All Functions ---------------------------
+
+@app.context_processor
+def utility_processor():
+    def format_date(date):
+        import datetime
+        from datetime import timedelta
+        """Formats a date to a relative time string, such as "1 min ago" or "1 hour ago".
+
+        Args:
+            date: A datetime object.
+
+        Returns:
+            A string representing the relative time between the given date and the current time.
+        """
+
+        now = datetime.datetime.now()
+        delta = now - date
+
+        if delta.seconds < 60:
+            return f"{delta.seconds} seconds ago"
+        elif delta.seconds < 3600:
+            minutes = delta.seconds // 60
+            return f"{minutes} minutes ago"
+        elif delta.seconds < 86400:
+            hours = delta.seconds // 3600
+            return f"{hours} hours ago"
+        else:
+            days = delta.seconds // 86400
+            return f"{days} days ago"
+
+    return dict(format_date=format_date)
+
+
+# Example usage:
+
+
 
 
 # Home Route (login or dashboard)
@@ -242,6 +285,8 @@ def dashboard():
 @app.route('/my-boards', methods=['POST', 'GET'])
 def my_boards():
 
+
+
     current_page = 'my_boards'
     all_tasks = Task.query.all()
     all_checklists = Checklist.query.all()
@@ -263,6 +308,7 @@ def my_boards():
         elif 'add_checklist' in request.form:
             parent_task = Task.query.get(request.args.get('task_id'))
             assigned_to = User.query.get(request.form.get('assigned_to'))
+
             new_checklist = Checklist(checklist_desc=request.form.get('checklist_desc'),
                                       due_date=request.form.get('due_date'),
                                       assigned_to=assigned_to,
@@ -279,7 +325,8 @@ def my_boards():
 
             new_notification = Notification(notificationtext="Sent you a team invite request",
                                             sender=current_user,
-                                            recipient=receiver)
+                                            recipient=receiver
+                                            )
 
             db.session.add(new_notification)
 
@@ -288,6 +335,7 @@ def my_boards():
             db.session.commit()
         elif 'accept_request' in request.form:
             requester = User.query.get(request.args.get('requester_id'))
+
 
             new_notification = Notification(notificationtext="Accepted your request",
                                             sender=current_user,
@@ -304,6 +352,8 @@ def my_boards():
         elif 'reject_request' in request.form:
             requester = User.query.get(request.args.get('requester_id'))
             current_user.invites.remove(requester)
+
+
 
             new_notification = Notification(notificationtext="Rejected request",
                                             sender=current_user,
@@ -383,6 +433,11 @@ def my_boards():
             task = Task.query.get(request.args.get("task_id"))
             print(task)
             db.session.delete(task)
+            db.session.commit()
+            return redirect(url_for('dashboard'))
+        elif 'delete_checklist' in request.form:
+            checklist = Checklist.query.get(request.args.get('checklist_id'))
+            db.session.delete(checklist)
             db.session.commit()
             return redirect(url_for('dashboard'))
     return render_template('projects.html', current_page=current_page, all_tasks=all_tasks, all_checklists=all_checklists)

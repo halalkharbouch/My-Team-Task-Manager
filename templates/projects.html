@@ -78,7 +78,7 @@
                                                         <div class="flex-fill ms-2">
                                                             <p class="d-flex justify-content-between mb-0 "><span
                                                                     class="font-weight-bold">{{ notification.sender.first_name }} {{ notification.sender.last_name }}</span> <small
-                                                                    class="">1DAY</small></p>
+                                                                    class="">{{ format_date(notification.time_stamp) }}</small></p>
                                                             <span class="">{{ notification.notificationtext }}</span>
                                                         </div>
                                                     </a>
@@ -172,7 +172,7 @@
                 <div class="row align-items-center">
                     <div class="border-0 mb-4">
                         <div class="card-header p-0 no-bg bg-transparent d-flex align-items-center px-0 justify-content-between border-bottom flex-wrap">
-                            <h3 class="fw-bold py-3 mb-0">My Tasks</h3>
+                            <h3 class="fw-bold py-3 mb-0">My Tasks </h3>
 
                         </div>
                     </div>
@@ -655,9 +655,9 @@
                     <div class="modal-body">
 
 
-                        <div class="row mb-3">
+                        <div class="row mb-3 d-flex justify-content-between">
 
-                            <div class="col-md-4 mb-3">
+                            <div class="col">
 
                                 <div class="d-flex">
 
@@ -675,14 +675,14 @@
 
                             </div>
 
-                            <div class="col-md-4 mx-auto">
-                                <div class="row d-flex ">
+                            <div class="col-md-4 mx-auto me-2">
+                                <div class="row d-flex justify-content-between">
                                     <div class="col-md-4">
                                         <label for="exampleFormControlInput2778"
                                                class="form-label text-sm-center text-danger  mt-2">Due
                                             Date</label>
                                     </div>
-                                    <div class="col-md-8">
+                                    <div class="col-md-8 align-self-end">
                                         <input type="date" class="form-control "
                                                id="exampleFormControlInput2778" value="{{ task.due_date }}">
                                     </div>
@@ -857,7 +857,7 @@
                                                                 <h6 class="mb-0"><span>{{ comment.comment_author.first_name }} {{ comment.comment_author.last_name }}</span>
 
                                                                 </h6>
-                                                                <span class="text-muted">3 hours ago</span>
+                                                                <span class="text-muted">{{ format_date(comment.time_stamp) }}</span>
                                                             </div>
                                                         </div>
                                                         <div class="timeline-item-post">
@@ -878,8 +878,7 @@
                                                                     <div class="flex-fill ms-3 text-truncate">
                                                                         <p class="mb-0"><span>{{ replies.reply_author.first_name }} {{ replies.reply_author.last_name }}</span>
                                                                             <small
-                                                                                    class="msg-time">1
-                                                                                hour ago</small>
+                                                                                    class="msg-time">{{ format_date(replies.time_stamp) }}</small>
                                                                         </p>
                                                                         <span class="text-muted">{{ replies.reply_text }}.</span>
                                                                     </div>
@@ -1006,7 +1005,7 @@
                     </div>
                     <div class="deadline-form">
 
-                            <div class="row g-3 mb-3">
+                            <div class="row g-3 mb-3 d-flex">
                                 <div class="col">
                                     <label for="depone11" class="form-label">Assign To</label>
                                     <select name="assigned_to" class="form-select">
